@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<launch>
+  <rosparam param="/use_sim_time">true</rosparam>
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find lexx_auto_launch)/maps/room_ok.yaml"/>
+
+  <!-- bag1, bag3 setting -->
+  
+  <!-- <node pkg="tf" type="static_transform_publisher" name="link0" args=" 0 0 0 0 0 0 map laser 100" /> -->
+  <!-- bag2 setting -->
+  <node pkg="tf" type="static_transform_publisher" name="link0" args=" 0.44  0.00 0 3.14 0 0 map laser_front      100" />
+  <node pkg="tf" type="static_transform_publisher" name="link1" args=" 0.00  0.35 0 0.00 0 0 map laser_back_left  100" />
+  <node pkg="tf" type="static_transform_publisher" name="link2" args=" 0.00 -0.35 0 0.00 0 0 map laser_back_right 100" />
+
+  <!-- lidar1.bag : /scan_front ( frame_id = laser ), /scan_back ( frame_id = laser ) -->
+  <!-- lidar2.bag : /scan_front ( frame_id = laser_front ), /scan_back_left ( frame_id = laser_back_left ), /scan_back_right ( frame_id = laser_right )-->
+  <!-- lidar3.bag : /scan_front ( frame_id = laser ), /scan_back_left ( frame_id = laser ), /scan_back_right ( frame_id = laser )-->
+
+
+  
+  <node name="rosbag_play" pkg="rosbag" type="play" args="$(find ira_laser_tools)/data/3lidar_1023.bag -l --clock" /> <!--$(find lidar_synthesizer)/data/lidar2.bag  -->
+  
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ira_laser_tools)/launch/lidar.rviz" />
+
+  
+  <include file="$(find ira_laser_tools)/launch/laserscan_multi_merger.launch" >
+  </include>
+       
+</launch>
