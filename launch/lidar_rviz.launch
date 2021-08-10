@@ -2,7 +2,7 @@
 <launch>
   <rosparam param="/use_sim_time">true</rosparam>
 
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find lexx_auto_launch)/maps/room_ok.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find lexx_auto_launch)/maps/room_ok/room_ok.yaml"/>
 
   <!-- bag1, bag3 setting -->
   
