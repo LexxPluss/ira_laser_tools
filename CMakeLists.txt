@@ -136,7 +136,7 @@ install(TARGETS
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY launch cfg data
+install(DIRECTORY launch data
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE)
 
