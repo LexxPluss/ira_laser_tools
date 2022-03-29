@@ -20,7 +20,7 @@
   
   <node name="rosbag_play" pkg="rosbag" type="play" args="$(find ira_laser_tools)/data/3lidar_1023.bag -l --clock" /> <!--$(find lidar_synthesizer)/data/lidar2.bag  -->
   
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ira_laser_tools)/launch/lidar.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ira_laser_tools)/rviz/lidar.rviz" />
 
   
   <include file="$(find ira_laser_tools)/launch/laserscan_multi_merger.launch" >
