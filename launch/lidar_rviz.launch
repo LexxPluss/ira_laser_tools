@@ -9,12 +9,12 @@
   <!-- <node pkg="tf" type="static_transform_publisher" name="link0" args=" 0 0 0 0 0 0 map laser 100" /> -->
   <!-- bag2 setting -->
   <node pkg="tf" type="static_transform_publisher" name="link0" args=" 0.44  0.00 0 3.14 0 0 map laser_front      100" />
-  <node pkg="tf" type="static_transform_publisher" name="link1" args=" 0.00  0.35 0 0.00 0 0 map laser_back_left  100" />
-  <node pkg="tf" type="static_transform_publisher" name="link2" args=" 0.00 -0.35 0 0.00 0 0 map laser_back_right 100" />
+  <node pkg="tf" type="static_transform_publisher" name="link1" args=" 0.00  0.35 0 0.00 0 0 map laser_rear_left  100" />
+  <node pkg="tf" type="static_transform_publisher" name="link2" args=" 0.00 -0.35 0 0.00 0 0 map laser_rear_right 100" />
 
-  <!-- lidar1.bag : /scan_front ( frame_id = laser ), /scan_back ( frame_id = laser ) -->
-  <!-- lidar2.bag : /scan_front ( frame_id = laser_front ), /scan_back_left ( frame_id = laser_back_left ), /scan_back_right ( frame_id = laser_right )-->
-  <!-- lidar3.bag : /scan_front ( frame_id = laser ), /scan_back_left ( frame_id = laser ), /scan_back_right ( frame_id = laser )-->
+  <!-- lidar1.bag : /scan_front ( frame_id = laser ), /scan_rear ( frame_id = laser ) -->
+  <!-- lidar2.bag : /scan_front ( frame_id = laser_front ), /scan_rear_left ( frame_id = laser_rear_left ), /scan_rear_right ( frame_id = laser_right )-->
+  <!-- lidar3.bag : /scan_front ( frame_id = laser ), /scan_rear_left ( frame_id = laser ), /scan_rear_right ( frame_id = laser )-->
 
 
   

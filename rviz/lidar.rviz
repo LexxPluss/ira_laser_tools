@@ -5,8 +5,8 @@ Panels:
     Property Tree Widget:
       Expanded:
         - //scan_front1
-        - //scan_back_left1
-        - //scan_back_right1
+        - //scan_rear_left1
+        - //scan_rear_right1
         - /LaserScan1
       Splitter Ratio: 0.498559088
     Tree Height: 744
@@ -100,14 +100,14 @@ Visualization Manager:
       Max Intensity: 47
       Min Color: 0; 0; 0
       Min Intensity: 47
-      Name: /scan_back_left
+      Name: /scan_rear_left
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.0399999991
       Style: Flat Squares
-      Topic: /scan_back_left
+      Topic: /scan_rear_left
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -130,14 +130,14 @@ Visualization Manager:
       Max Intensity: 47
       Min Color: 0; 0; 0
       Min Intensity: 47
-      Name: /scan_back_right
+      Name: /scan_rear_right
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.0399999991
       Style: Flat Squares
-      Topic: /scan_back_right
+      Topic: /scan_rear_right
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
