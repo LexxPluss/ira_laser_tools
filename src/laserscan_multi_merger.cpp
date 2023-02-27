@@ -49,7 +49,7 @@ private:
     double scan_time;
     double range_min;
     double range_max;
-	bool is_out_of_range_inf;
+    bool is_out_of_range_inf;
 
     string destination_frame;
     string cloud_destination_topic;
