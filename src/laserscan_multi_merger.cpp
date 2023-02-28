@@ -49,6 +49,7 @@ private:
     double scan_time;
     double range_min;
     double range_max;
+    bool set_inf_to_the_points_exceed_range_max;
 
     string destination_frame;
     string cloud_destination_topic;
@@ -97,6 +98,7 @@ LaserscanMerger::LaserscanMerger()
     nh.param("scan_time", scan_time, 0.0333333);
     nh.param("range_min", range_min, 0.45);
     nh.param("range_max", range_max, 25.0);
+    nh.param("set_inf_to_the_points_exceed_range_max", set_inf_to_the_points_exceed_range_max, false);
 
     this->laserscan_topic_parser();
 
@@ -172,7 +174,14 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 	output->range_max = this->range_max;
 
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
-	output->ranges.assign(ranges_size, output->range_max + 1.0);
+	if (set_inf_to_the_points_exceed_range_max)
+	{
+		output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
+	}
+	else
+	{
+		output->ranges.assign(ranges_size, output->range_max + 1.0);
+	}
 
 	for(int i=0; i<points.cols(); i++)
 	{
