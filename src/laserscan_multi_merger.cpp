@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <string.h>
+#include <string>
 #include <tf/transform_listener.h>
 #include <pcl_ros/transforms.h>
 #include <laser_geometry/laser_geometry.h>
