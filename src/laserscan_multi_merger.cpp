@@ -143,6 +143,7 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 	{
 		pcl::PCLPointCloud2 merged_cloud = clouds[0];
 		clouds_modified[0] = false;
+		merged_cloud.fields[3].name = "intensity";
 
 		for(int i=1; i<clouds_modified.size(); ++i)
 		{
@@ -177,10 +178,12 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 	if (set_inf_to_the_points_exceed_range_max)
 	{
 		output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
+		output->intensities.assign(ranges_size, 0);
 	}
 	else
 	{
 		output->ranges.assign(ranges_size, output->range_max + 1.0);
+		// output->intensities.assign(ranges_size, output->intensities + 1.0);
 	}
 
 	for(int i=0; i<points.cols(); i++)
@@ -188,6 +191,7 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 		const float &x = points(0,i);
 		const float &y = points(1,i);
 		const float &z = points(2,i);
+		const float &intensity = points(3,i);
 
 		if ( std::isnan(x) || std::isnan(y) || std::isnan(z) )
 		{
@@ -196,6 +200,7 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 		}
 
 		double range_sq = y*y+x*x;
+		double intensity_sq = intensity;
 		double range_min_sq_ = output->range_min * output->range_min;
 		if (range_sq < range_min_sq_) {
 			ROS_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range_sq, range_min_sq_, x, y, z);
@@ -213,6 +218,7 @@ void LaserscanMerger::pointcloud_to_laserscan(Eigen::MatrixXf points, pcl::PCLPo
 
 		if (output->ranges[index] * output->ranges[index] > range_sq)
 			output->ranges[index] = sqrt(range_sq);
+			output->intensities[index] = intensity_sq;
 	}
 
 	laser_scan_publisher_.publish(output);
