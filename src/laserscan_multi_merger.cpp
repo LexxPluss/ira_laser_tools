@@ -237,7 +237,6 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "laser_multi_merger");
-
 	LaserscanMerger _laser_merger;
 
     dynamic_reconfigure::Server<laserscan_multi_mergerConfig> server;
