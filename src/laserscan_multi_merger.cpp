@@ -143,7 +143,6 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 	{
 		pcl::PCLPointCloud2 merged_cloud = clouds[0];
 		clouds_modified[0] = false;
-		merged_cloud.fields[3].name = "intensity";
 
 		for(int i=1; i<clouds_modified.size(); ++i)
 		{
@@ -159,20 +158,21 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 
 void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 {
-	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
-	output->header = pcl_conversions::fromPCL(merged_cloud->header);
-	output->header.frame_id = destination_frame.c_str();
-	output->header.stamp = ros::Time::now();  //fixes #265
-	output->angle_min = this->angle_min;
-	output->angle_max = this->angle_max;
-	output->angle_increment = this->angle_increment;
-	output->time_increment = this->time_increment;
-	output->scan_time = this->scan_time;
-	output->range_min = this->range_min;
-	output->range_max = this->range_max;
+    sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
+    output->header = pcl_conversions::fromPCL(merged_cloud->header);
+    output->header.frame_id = destination_frame.c_str();
+    output->header.stamp = ros::Time::now();
+    output->angle_min = this->angle_min;
+    output->angle_max = this->angle_max;
+    output->angle_increment = this->angle_increment;
+    output->time_increment = this->time_increment;
+    output->scan_time = this->scan_time;
+    output->range_min = this->range_min;
+    output->range_max = this->range_max;
+
     std::vector<float> intensities;
 
-	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
+    uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
 	if (set_inf_to_the_points_exceed_range_max)
 	{
     	output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
