@@ -195,15 +195,15 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 			ROS_DEBUG("rejected for nan in point(%f, %f, %f)\n", x, y, z);
 			continue;
 		}
-		
-		double range_sq = y * y + x * x;
+
+		double range_sq = y*y+x*x;
 		double range_min_sq_ = output->range_min * output->range_min;
 		if (range_sq < range_min_sq_)
 		{
 			ROS_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range_sq, range_min_sq_, x, y, z);
 			continue;
 		}
-		
+
 		double angle = atan2(y, x);
 		if (angle < output->angle_min || angle > output->angle_max)
 		{
