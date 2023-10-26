@@ -114,7 +114,7 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 
     // Verify that TF knows how to transform from the received scan to the destination scan frame
 	tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
-    projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Intensity | laser_geometry::channel_option::Distance);
+	projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Intensity | laser_geometry::channel_option::Distance);
 	try
 	{
 		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
@@ -181,8 +181,8 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 		output->ranges.assign(ranges_size, output->range_max + 1.0);
 	}
 
-        for (size_t i = 0; i < merged_cloud->data.size(); i += merged_cloud->point_step)
-        {
+	for (size_t i = 0; i < merged_cloud->data.size(); i += merged_cloud->point_step)
+	{
 		float x, y, z;
 		float intensity_value;
 		memcpy(&x, &merged_cloud->data[i], sizeof(float));
@@ -225,11 +225,8 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 		}
 	}
 
-        output->intensities.resize(intensities.size());
-	for (size_t i = 0; i < intensities.size(); ++i)
-	{
-		output->intensities[i] = intensities[i];
-        }
+	output->intensities.resize(intensities.size());
+	output->intensities = intensities;
 
 	laser_scan_publisher_.publish(output);
 }
@@ -239,10 +236,10 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "laser_multi_merger");
 	LaserscanMerger _laser_merger;
 
-    dynamic_reconfigure::Server<laserscan_multi_mergerConfig> server;
-    dynamic_reconfigure::Server<laserscan_multi_mergerConfig>::CallbackType f;
+	dynamic_reconfigure::Server<laserscan_multi_mergerConfig> server;
+	dynamic_reconfigure::Server<laserscan_multi_mergerConfig>::CallbackType f;
 
-    f = boost::bind(&LaserscanMerger::reconfigureCallback,&_laser_merger, _1, _2);
+	f = boost::bind(&LaserscanMerger::reconfigureCallback,&_laser_merger, _1, _2);
 	server.setCallback(f);
 
 	ros::spin();
