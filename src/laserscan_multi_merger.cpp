@@ -158,81 +158,81 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 
 void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 {
-    sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
-    output->header = pcl_conversions::fromPCL(merged_cloud->header);
-    output->header.frame_id = destination_frame.c_str();
-    output->header.stamp = ros::Time::now();
-    output->angle_min = this->angle_min;
-    output->angle_max = this->angle_max;
-    output->angle_increment = this->angle_increment;
-    output->time_increment = this->time_increment;
-    output->scan_time = this->scan_time;
-    output->range_min = this->range_min;
-    output->range_max = this->range_max;
+        sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
+        output->header = pcl_conversions::fromPCL(merged_cloud->header);
+        output->header.frame_id = destination_frame.c_str();
+        output->header.stamp = ros::Time::now();
+        output->angle_min = this->angle_min;
+        output->angle_max = this->angle_max;
+        output->angle_increment = this->angle_increment;
+        output->time_increment = this->time_increment;
+        output->scan_time = this->scan_time;
+        output->range_min = this->range_min;
+        output->range_max = this->range_max;
 
-    std::vector<float> intensities;
+        std::vector<float> intensities;
 
-    uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
+        uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
 	if (set_inf_to_the_points_exceed_range_max)
 	{
-    	output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
+    	        output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
 	}
 	else
 	{
 		output->ranges.assign(ranges_size, output->range_max + 1.0);
 	}
 
-    for (size_t i = 0; i < merged_cloud->data.size(); i += merged_cloud->point_step)
-    {
-        float x, y, z;
-        float intensity_value;
-        memcpy(&x, &merged_cloud->data[i], sizeof(float));
-        memcpy(&y, &merged_cloud->data[i + sizeof(float)], sizeof(float));
-        memcpy(&z, &merged_cloud->data[i + 2 * sizeof(float)], sizeof(float));
-        memcpy(&intensity_value, &merged_cloud->data[i + 3 * sizeof(float)], sizeof(float));
-
-        if (std::isnan(x) || std::isnan(y) || std::isnan(z))
+        for (size_t i = 0; i < merged_cloud->data.size(); i += merged_cloud->point_step)
         {
-            ROS_DEBUG("rejected for nan in point(%f, %f, %f)\n", x, y, z);
-            continue;
+            float x, y, z;
+            float intensity_value;
+            memcpy(&x, &merged_cloud->data[i], sizeof(float));
+            memcpy(&y, &merged_cloud->data[i + sizeof(float)], sizeof(float));
+            memcpy(&z, &merged_cloud->data[i + 2 * sizeof(float)], sizeof(float));
+            memcpy(&intensity_value, &merged_cloud->data[i + 3 * sizeof(float)], sizeof(float));
+
+            if (std::isnan(x) || std::isnan(y) || std::isnan(z))
+            {
+                ROS_DEBUG("rejected for nan in point(%f, %f, %f)\n", x, y, z);
+                continue;
+            }
+
+            double range_sq = y * y + x * x;
+            double range_min_sq_ = output->range_min * output->range_min;
+            if (range_sq < range_min_sq_)
+            {
+                ROS_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range_sq, range_min_sq_, x, y, z);
+                continue;
+            }
+
+            double angle = atan2(y, x);
+            if (angle < output->angle_min || angle > output->angle_max)
+            {
+                ROS_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, output->angle_min, output->angle_max);
+                continue;
+            }
+
+            int index = (angle - output->angle_min) / output->angle_increment;
+
+            if (output->ranges[index] * output->ranges[index] > range_sq)
+            {
+                output->ranges[index] = sqrt(range_sq);
+                intensities.resize(ranges_size);
+            }
+
+            if (intensities[index] < intensity_value)
+            {
+                intensities[index] = intensity_value;
+            }
         }
 
-        double range_sq = y * y + x * x;
-        double range_min_sq_ = output->range_min * output->range_min;
-        if (range_sq < range_min_sq_)
+        output->intensities.resize(intensities.size());
+        for (size_t i = 0; i < intensities.size(); ++i)
         {
-            ROS_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range_sq, range_min_sq_, x, y, z);
-            continue;
+            output->intensities[i] = intensities[i];
         }
 
-        double angle = atan2(y, x);
-        if (angle < output->angle_min || angle > output->angle_max)
-        {
-            ROS_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, output->angle_min, output->angle_max);
-            continue;
-        }
-
-        int index = (angle - output->angle_min) / output->angle_increment;
-
-        if (output->ranges[index] * output->ranges[index] > range_sq)
-        {
-            output->ranges[index] = sqrt(range_sq);
-            intensities.resize(ranges_size);
-        }
-
-        if (intensities[index] < intensity_value)
-        {
-            intensities[index] = intensity_value;
-        }
-    }
-
-    output->intensities.resize(intensities.size());
-    for (size_t i = 0; i < intensities.size(); ++i)
-    {
-        output->intensities[i] = intensities[i];
-    }
-
-    laser_scan_publisher_.publish(output);
+        laser_scan_publisher_.publish(output);
 }
 
 int main(int argc, char** argv)
