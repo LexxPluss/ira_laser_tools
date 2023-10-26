@@ -226,17 +226,18 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 	}
 
         output->intensities.resize(intensities.size());
-        for (size_t i = 0; i < intensities.size(); ++i)
-        {
-            output->intensities[i] = intensities[i];
+	for (size_t i = 0; i < intensities.size(); ++i)
+	{
+		output->intensities[i] = intensities[i];
         }
 
-        laser_scan_publisher_.publish(output);
+	laser_scan_publisher_.publish(output);
 }
 
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "laser_multi_merger");
+
 	LaserscanMerger _laser_merger;
 
     dynamic_reconfigure::Server<laserscan_multi_mergerConfig> server;
