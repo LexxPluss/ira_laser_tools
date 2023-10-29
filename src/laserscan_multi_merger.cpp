@@ -67,7 +67,7 @@ void LaserscanMerger::reconfigureCallback(laserscan_multi_mergerConfig &config, 
 	this->scan_time = config.scan_time;
 	this->range_min = config.range_min;
 	this->range_max = config.range_max;
-	this->intensity_min = config.intensity_min;
+	// this->intensity_min = config.intensity_min;
 }
 
 void LaserscanMerger::laserscan_topic_parser()
@@ -172,7 +172,7 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 	output->scan_time = this->scan_time;
 	output->range_min = this->range_min;
 	output->range_max = this->range_max;
-	output->intensity_min = this->intensity_min;
+	// output->intensity_min = this->intensity_min;
 	std::vector<float> intensities;
 	
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
@@ -217,7 +217,7 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 
 		int index = (angle - output->angle_min) / output->angle_increment;
 
-		if (intensity_value > output->intensity_min)
+		if (intensity_value > intensity_min)
 		{
 			if (output->ranges[index] * output->ranges[index] > range_sq)
 			{
