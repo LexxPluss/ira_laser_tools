@@ -99,7 +99,7 @@ LaserscanMerger::LaserscanMerger()
     nh.param("scan_time", scan_time, 0.0333333);
     nh.param("range_min", range_min, 0.45);
     nh.param("range_max", range_max, 25.0);
-    nh.param("intensity_min", intensity_min, 4000.0);
+    nh.param("intensity_min", intensity_min, 1000.0);
     nh.param("set_inf_to_the_points_exceed_range_max", set_inf_to_the_points_exceed_range_max, false);
 
     this->laserscan_topic_parser();
