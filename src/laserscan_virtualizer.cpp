@@ -47,6 +47,7 @@ class LaserscanVirtualizer
 		double scan_time;
 		double range_min;
 		double range_max;
+		double intensity_min;
 
 		string cloud_frame;
 		string base_frame;

@@ -49,6 +49,7 @@ private:
     double scan_time;
     double range_min;
     double range_max;
+    double intensity_min;
     bool set_inf_to_the_points_exceed_range_max;
 
     string destination_frame;
@@ -98,6 +99,7 @@ LaserscanMerger::LaserscanMerger()
     nh.param("scan_time", scan_time, 0.0333333);
     nh.param("range_min", range_min, 0.45);
     nh.param("range_max", range_max, 25.0);
+    nh.param("intensity_min", intensity_min, 1000.0);
     nh.param("set_inf_to_the_points_exceed_range_max", set_inf_to_the_points_exceed_range_max, false);
 
     this->laserscan_topic_parser();
@@ -213,15 +215,18 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 
 		int index = (angle - output->angle_min) / output->angle_increment;
 
-		if (output->ranges[index] * output->ranges[index] > range_sq)
+		if (intensity_value > intensity_min)
 		{
-			output->ranges[index] = sqrt(range_sq);
-			intensities.resize(ranges_size, 0.0f);
-		}
+			if (output->ranges[index] * output->ranges[index] > range_sq)
+			{
+				output->ranges[index] = sqrt(range_sq);
+				intensities.resize(ranges_size, 0.0f);
+			}
 
-		if (intensities[index] < intensity_value)
-		{
-			intensities[index] = intensity_value;
+			if (intensities[index] < intensity_value)
+			{
+				intensities[index] = intensity_value;
+			}
 		}
 	}
 
