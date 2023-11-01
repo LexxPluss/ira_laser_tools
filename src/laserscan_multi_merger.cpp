@@ -55,6 +55,7 @@ private:
     string destination_frame;
     string cloud_destination_topic;
     string scan_destination_topic;
+    string hi_intensity_scan_destination_topic;
     string laserscan_topics;
 };
 
@@ -92,6 +93,7 @@ LaserscanMerger::LaserscanMerger()
     nh.param<std::string>("destination_frame", destination_frame, "cart_frame");
     nh.param<std::string>("cloud_destination_topic", cloud_destination_topic, "/merged_cloud");
     nh.param<std::string>("scan_destination_topic", scan_destination_topic, "/scan_multi");
+    nh.param<std::string>("hi_intensity_scan_destination_topic", hi_intensity_scan_destination_topic, "/scan_high_intensity");
     nh.param<std::string>("laserscan_topics", laserscan_topics, "");
     nh.param("angle_min", angle_min, -2.36);
     nh.param("angle_max", angle_max, 2.36);
@@ -106,6 +108,7 @@ LaserscanMerger::LaserscanMerger()
 
 	point_cloud_publisher_ = node_.advertise<sensor_msgs::PointCloud2> (cloud_destination_topic.c_str(), 1, false);
 	laser_scan_publisher_ = node_.advertise<sensor_msgs::LaserScan> (scan_destination_topic.c_str(), 1, false);
+	laser_hi_intensity_scan_publisher_ = node_.advertise<sensor_msgs::LaserScan> (hi_intensity_scan_destination_topic.c_str(), 1, false);
 
 }
 
@@ -161,6 +164,8 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 {
 	sensor_msgs::LaserScanPtr output(new sensor_msgs::LaserScan());
+	sensor_msgs::LaserScanPtr hi_intensity_output(new sensor_msgs::LaserScan());
+
 	output->header = pcl_conversions::fromPCL(merged_cloud->header);
 	output->header.frame_id = destination_frame.c_str();
 	output->header.stamp = ros::Time::now();
@@ -171,16 +176,29 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 	output->scan_time = this->scan_time;
 	output->range_min = this->range_min;
 	output->range_max = this->range_max;
+
+	hi_intensity_output->header = pcl_conversions::fromPCL(merged_cloud->header);
+	hi_intensity_output->header.frame_id = destination_frame.c_str();
+	hi_intensity_output->header.stamp = ros::Time::now();
+	hi_intensity_output->angle_min = this->angle_min;
+	hi_intensity_output->angle_max = this->angle_max;
+	hi_intensity_output->angle_increment = this->angle_increment;
+	hi_intensity_output->time_increment = this->time_increment;
+	hi_intensity_output->scan_time = this->scan_time;
+	hi_intensity_output->range_min = this->range_min;
+	hi_intensity_output->range_max = this->range_max;
 	std::vector<float> intensities;
 	
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
 	if (set_inf_to_the_points_exceed_range_max)
 	{
 		output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
+		hi_intensity_output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
 	}
 	else
 	{
 		output->ranges.assign(ranges_size, output->range_max + 1.0);
+		hi_intensity_output->ranges.assign(ranges_size, output->range_max + 1.0);
 	}
 
 	for (size_t i = 0; i < merged_cloud->data.size(); i += merged_cloud->point_step)
@@ -214,12 +232,14 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 		}
 
 		int index = (angle - output->angle_min) / output->angle_increment;
+		if (output->ranges[index] * output->ranges[index] > range_sq)
+			output->ranges[index] = sqrt(range_sq);
 
 		if (intensity_value > intensity_min)
 		{
-			if (output->ranges[index] * output->ranges[index] > range_sq)
+			if (hi_intensity_output->ranges[index] * hi_intensity_output->ranges[index] > range_sq)
 			{
-				output->ranges[index] = sqrt(range_sq);
+				hi_intensity_output->ranges[index] = sqrt(range_sq);
 				intensities.resize(ranges_size, 0.0f);
 			}
 
@@ -230,10 +250,11 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 		}
 	}
 
-	output->intensities.resize(intensities.size());
-	output->intensities = intensities;
+	hi_intensity_output->intensities.resize(intensities.size());
+	hi_intensity_output->intensities = intensities;
 
 	laser_scan_publisher_.publish(output);
+	laser_hi_intensity_scan_publisher_.publish(hi_intensity_output);
 }
 
 int main(int argc, char** argv)
