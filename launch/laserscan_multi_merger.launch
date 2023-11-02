@@ -9,7 +9,6 @@ DESCRITPION
         	    <!-- <param name="destination_frame" value="base_link"/>                  -->
 		<param name="cloud_destination_topic" value="/merged_cloud"/>
 		<param name="scan_destination_topic" value="/scan"/>
-		<param name="hi_intensity_scan_destination_topic" value="/scan_high_intensity"/>
                 <param name="laserscan_topics" value ="/scan_front /scan_rear_right /scan_rear_left" /> <!-- LIST OF THE LASER SCAN TOPICS TO SUBSCRIBE -->
 
                      
