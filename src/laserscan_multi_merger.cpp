@@ -206,6 +206,13 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 			continue;
 		}
 
+		double range_max_sq_ = output->range_max * output->range_max;
+		if (range_max_sq_ <= range_sq)
+		{
+			ROS_DEBUG("rejected for range %f above maximum value %f. Point: (%f, %f, %f)", range_sq, range_max_sq_, x, y, z);
+			continue;
+		}
+
 		double angle = atan2(y, x);
 		if (angle < output->angle_min || angle > output->angle_max)
 		{
