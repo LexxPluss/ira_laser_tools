@@ -25,7 +25,7 @@ class LaserscanMerger
 public:
     LaserscanMerger();
     void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic);
-	void setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& msg, sensor_msgs::LaserScan& filtered_scan);
+    void setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& msg, sensor_msgs::LaserScan& filtered_scan);
     void pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud);
     void reconfigureCallback(laserscan_multi_mergerConfig &config, uint32_t level);
 
@@ -43,8 +43,8 @@ private:
 
     void laserscan_topic_parser();
 
-	double limit_angle_min;
-	double limit_angle_max;
+    double limit_angle_min;
+    double limit_angle_max;
 
     double angle_min;
     double angle_max;
@@ -130,8 +130,8 @@ void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& sca
 		float angle = scan->angle_min + i * scan->angle_increment;
 		if (angle >= this->limit_angle_min && angle <= this->limit_angle_max)
 		{
-		filtered_scan.ranges.push_back(scan->ranges[i]);
-		filtered_scan.intensities.push_back(scan->intensities[i]);
+			filtered_scan.ranges.push_back(scan->ranges[i]);
+			filtered_scan.intensities.push_back(scan->intensities[i]);
 		}
 	}
 }
