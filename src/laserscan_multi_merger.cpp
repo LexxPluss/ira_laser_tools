@@ -25,6 +25,7 @@ class LaserscanMerger
 public:
     LaserscanMerger();
     void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic);
+    void setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& msg, sensor_msgs::LaserScan& filtered_scan);
     void pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud);
     void reconfigureCallback(laserscan_multi_mergerConfig &config, uint32_t level);
 
@@ -41,6 +42,9 @@ private:
     vector<pcl::PCLPointCloud2> clouds;
 
     void laserscan_topic_parser();
+
+    double limit_angle_min;
+    double limit_angle_max;
 
     double angle_min;
     double angle_max;
@@ -93,6 +97,8 @@ LaserscanMerger::LaserscanMerger()
     nh.param<std::string>("cloud_destination_topic", cloud_destination_topic, "/merged_cloud");
     nh.param<std::string>("scan_destination_topic", scan_destination_topic, "/scan_multi");
     nh.param<std::string>("laserscan_topics", laserscan_topics, "");
+    nh.param("limit_angle_min", limit_angle_min, -2.0933);
+    nh.param("limit_angle_max", limit_angle_max, 2.0933);
     nh.param("angle_min", angle_min, -2.36);
     nh.param("angle_max", angle_max, 2.36);
     nh.param("angle_increment", angle_increment, 0.0058);
@@ -109,14 +115,37 @@ LaserscanMerger::LaserscanMerger()
 
 }
 
+void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& scan, sensor_msgs::LaserScan& filtered_scan)
+{
+	filtered_scan.header = scan->header;
+	filtered_scan.angle_increment = scan->angle_increment;
+	filtered_scan.time_increment = scan->time_increment;
+	filtered_scan.scan_time = scan->scan_time;
+	filtered_scan.range_min = scan->range_min;
+	filtered_scan.range_max = scan->range_max;
+	filtered_scan.angle_min = this->limit_angle_min;
+	filtered_scan.angle_max = this->limit_angle_max;
+	for (unsigned int i = 0; i < scan->ranges.size(); ++i)
+	{
+		float angle = scan->angle_min + i * scan->angle_increment;
+		if (angle >= this->limit_angle_min && angle <= this->limit_angle_max)
+		{
+			filtered_scan.ranges.push_back(scan->ranges[i]);
+			filtered_scan.intensities.push_back(scan->intensities[i]);
+		}
+	}
+}
+
 void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan, std::string topic)
 {
 	sensor_msgs::PointCloud tmpCloud1,tmpCloud2;
 	sensor_msgs::PointCloud2 tmpCloud3;
+	sensor_msgs::LaserScan filtered_scan;
 
     // Verify that TF knows how to transform from the received scan to the destination scan frame
 	tfListener_.waitForTransform(scan->header.frame_id.c_str(), destination_frame.c_str(), scan->header.stamp, ros::Duration(1));
-	projector_.transformLaserScanToPointCloud(scan->header.frame_id, *scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Intensity | laser_geometry::channel_option::Distance);
+	setAngleLimits(scan, filtered_scan);
+	projector_.transformLaserScanToPointCloud(filtered_scan.header.frame_id, filtered_scan, tmpCloud1, tfListener_, laser_geometry::channel_option::Intensity | laser_geometry::channel_option::Distance);
 	try
 	{
 		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
