@@ -125,13 +125,23 @@ void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& sca
 	filtered_scan.range_max = scan->range_max;
 	filtered_scan.angle_min = this->limit_angle_min;
 	filtered_scan.angle_max = this->limit_angle_max;
+    bool has_intensity = !scan->intensities.empty();
+
+    if (!has_intensity)
+    {
+		ROS_ERROR("Intensities array is empty in the LaserScan message.");
+    }
+
 	for (unsigned int i = 0; i < scan->ranges.size(); ++i)
 	{
 		float angle = scan->angle_min + i * scan->angle_increment;
 		if (angle >= this->limit_angle_min && angle <= this->limit_angle_max)
 		{
 			filtered_scan.ranges.push_back(scan->ranges[i]);
-			filtered_scan.intensities.push_back(scan->intensities[i]);
+			if (has_intensity)
+			{
+				filtered_scan.intensities.push_back(scan->intensities[i]);
+			}
 		}
 	}
 }
