@@ -144,7 +144,7 @@ void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& sca
 			}
 			else
 			{
-				filtered_scan.intensities.push_back(0.0);
+				filtered_scan.intensities.push_back(intensity_min);
 			}
 		}
 	}
@@ -265,7 +265,7 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 
 		int index = (angle - output->angle_min) / output->angle_increment;
 
-		if (intensity_value > intensity_min)
+		if (intensity_value >= intensity_min)
 		{
 			if (output->ranges[index] * output->ranges[index] > range_sq)
 			{
