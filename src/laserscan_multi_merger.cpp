@@ -129,7 +129,7 @@ void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& sca
 
 	if (!has_intensity)
 	{
-		ROS_ERROR("Intensities array is empty in the LaserScan message.");
+		ROS_ERROR_THROTTLE(5.0, "Intensities array is empty in the LaserScan message.");
 	}
 
 	for (unsigned int i = 0; i < scan->ranges.size(); ++i)
