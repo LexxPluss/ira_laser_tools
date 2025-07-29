@@ -129,8 +129,7 @@ void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& sca
 
 	if (!has_intensity)
 	{
-		ROS_ERROR("Intensities array is empty in the LaserScan message.");
-		return;
+		ROS_ERROR_THROTTLE(5.0, "Intensities array is empty in the LaserScan message.");
 	}
 
 	for (unsigned int i = 0; i < scan->ranges.size(); ++i)
@@ -142,6 +141,10 @@ void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& sca
 			if (has_intensity)
 			{
 				filtered_scan.intensities.push_back(scan->intensities[i]);
+			}
+			else
+			{
+				filtered_scan.intensities.push_back(intensity_min);
 			}
 		}
 	}
@@ -211,9 +214,9 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 	output->scan_time = this->scan_time;
 	output->range_min = this->range_min;
 	output->range_max = this->range_max;
-	std::vector<float> intensities;
 	
 	uint32_t ranges_size = std::ceil((output->angle_max - output->angle_min) / output->angle_increment);
+	std::vector<float> intensities(ranges_size, 0.0f);
 	if (set_inf_to_the_points_exceed_range_max)
 	{
 		output->ranges.assign(ranges_size, std::numeric_limits<float>::infinity());
@@ -262,12 +265,11 @@ void LaserscanMerger::pointcloud_to_laserscan(pcl::PCLPointCloud2 *merged_cloud)
 
 		int index = (angle - output->angle_min) / output->angle_increment;
 
-		if (intensity_value > intensity_min)
+		if (intensity_value >= intensity_min)
 		{
 			if (output->ranges[index] * output->ranges[index] > range_sq)
 			{
 				output->ranges[index] = sqrt(range_sq);
-				intensities.resize(ranges_size, 0.0f);
 			}
 
 			if (intensities[index] < intensity_value)
