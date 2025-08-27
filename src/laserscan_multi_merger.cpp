@@ -129,7 +129,7 @@ void LaserscanMerger::setAngleLimits(const sensor_msgs::LaserScan::ConstPtr& sca
 
 	if (!has_intensity)
 	{
-		ROS_ERROR_THROTTLE(5.0, "Intensities array is empty in the LaserScan message.");
+		ROS_WARN_THROTTLE(5.0, "Intensities array is empty in the LaserScan message.");
 	}
 
 	for (unsigned int i = 0; i < scan->ranges.size(); ++i)
@@ -163,7 +163,7 @@ void LaserscanMerger::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan,
 	try
 	{
 		tfListener_.transformPointCloud(destination_frame.c_str(), tmpCloud1, tmpCloud2);
-	}catch (tf::TransformException ex){ROS_ERROR("%s",ex.what());return;}
+	}catch (tf::TransformException ex){ROS_WARN("%s",ex.what());return;}
 
 	for(int i=0; i<scan_subscribers.size(); ++i)
 	{
